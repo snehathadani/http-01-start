@@ -1,8 +1,8 @@
 import {Injectable} from '@angular/core'
 import { Post } from './post.model';
 import {HttpClient} from '@angular/common/http'
-import { Subject } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Subject, throwError } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 @Injectable({providedIn: 'root'})
 export class PostsService{
     error = new Subject<string>();
@@ -32,7 +32,11 @@ export class PostsService{
       }
       return postsArray;
     }
-    ))
+    ), catchError(errorRes => {
+        //send to analytics general error handling task
+        return throwError(errorRes)
+
+    }))
     // .subscribe(posts=>{
       
     //   console.log("subscribe postss",posts)
