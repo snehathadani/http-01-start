@@ -25,9 +25,14 @@ export class AppComponent implements OnInit, OnDestroy {
       this.isFetching=false
       this.loadedPosts= posts
     }, error=> {
+      this.isFetching = false;
       this.error = error.message;
       console.log(error)
     })
+  }
+
+  onHandleError(){
+    this.error = null;
   }
 
   onCreatePost(postData: Post) {
@@ -47,6 +52,7 @@ export class AppComponent implements OnInit, OnDestroy {
       this.isFetching = false;
       this.loadedPosts = posts
     }, error=> {
+      this.isFetching = false;
       this.error = error.message;
     })
   }
