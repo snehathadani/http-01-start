@@ -1,8 +1,8 @@
 import {Injectable} from '@angular/core'
 import { Post } from './post.model';
-import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http'
+import {HttpClient, HttpHeaders, HttpParams, HttpEventType} from '@angular/common/http'
 import { Subject, throwError } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { map, catchError, tap } from 'rxjs/operators';
 @Injectable({providedIn: 'root'})
 export class PostsService{
     error = new Subject<string>();
@@ -11,9 +11,13 @@ export class PostsService{
 
     createAndStorePost(title:string, content:string) {
         const postData: Post={title:title, content:content}
-        this.http.post<{name: string}>('https://angular-guide-85315-default-rtdb.firebaseio.com/posts.json', postData)
+        this.http.post<{name: string}>('https://angular-guide-85315-default-rtdb.firebaseio.com/posts.json', postData,
+            {
+                observe:'response'// or  observe:'response' where entire js object is conbverted to JS
+            }
+        )
         .subscribe(responseData => {
-            console.log("response.name", responseData.name)
+            console.log("response.name", responseData.body)
                 console.log("responseData:",responseData)
               }, error => {
                 this.error.next(error.message)
@@ -52,6 +56,18 @@ export class PostsService{
     // })
     }
     deletePosts(){
-      return this.http.delete('https://angular-guide-85315-default-rtdb.firebaseio.com/posts.json')
+      return this.http.delete('https://angular-guide-85315-default-rtdb.firebaseio.com/posts.json',
+        {
+            observe: 'events'
+        }).pipe(
+            tap(event=> {
+            console.log("event",event)
+            if(event.type === HttpEventType.Sent){
+                console.log("request sent")
+            }
+            if(event.type === HttpEventType.Response) {
+                console.log("event.body",event.body)
+            }
+        }))
     }
 }
